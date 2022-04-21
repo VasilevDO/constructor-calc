@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import Draggable from 'react-draggable';
 
 import CalcDigits from '../components/CalcDigits/CalcDigits.component';
 import CalcOperations from '../components/CalcOperations/CalcOperations.component';
@@ -10,23 +9,15 @@ const StyledResolveButton = styled.button`
     width:240px;
 `;
 
-const dragEvent = (e, data) => {
-	console.log('Event Type', e.type);
-	console.log({e, data});
-	return false;
-};
-
 const Concalc = () => {
 	const switcherValues = ['Runtime', 'Constructor'];
+
 	return (
 		<div className={'concalc'}>
 			<Switcher values={switcherValues}/>
 			<CalcOperations/>
 			<CalcDigits/>
-			<Draggable onStop={dragEvent}>
-				<StyledResolveButton type="button" className="btn btn-light">=</StyledResolveButton>
-			</Draggable>
-
+			<StyledResolveButton type="button" className="btn btn-light">=</StyledResolveButton>
 		</div>
 	);
 };
