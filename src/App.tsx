@@ -1,34 +1,67 @@
-import {DragDropContext} from 'react-beautiful-dnd';
-import Column from './components/Column.component';
-import initialData from './init';
+import {DragDropContext, Draggable, Droppable, DropResult} from 'react-beautiful-dnd';
+import styled from 'styled-components';
+import CalcDigits from './components/CalcDigits/CalcDigits.component';
+import CalcOperations from './components/CalcOperations/CalcOperations.component';
+import CalcScreen from './components/CalcScreen/CalcScreen.component';
+
+const Container = styled.div`
+	display:flex;
+	width:100%;
+	> div {
+		width:400px;
+		border:2px solid gray;
+	}
+`;
 
 const App = () => {
-	const kek = 'w';
-
-	const state = initialData;
-
-	const dragEndHandler = (res:any) => {
+	const dragEndHandler = (res:DropResult) => {
 		console.log(res);
 	};
 
-	// Return (
-	// 	<DragDropContext onDragEnd={dragEndHandler}>
-	// 		<div>
-	// 			<h1>{kek}</h1>
-	// 			<Concalc/>
-	// 			<ConstructorArea/>
-	// 		</div>
-	// 	</DragDropContext>
+	console.log('kek');
 
-	// );
-
-	return (
+	return 	(
 		<DragDropContext onDragEnd={dragEndHandler}>
-			{state.columnOrder.map(columnId => {
-				const column = state.columns[columnId];
-				const tasks = column.taskIds.map(taskId => state.tasks[taskId]);
-				return <Column key={column.id} column={column} tasks={tasks}/>;
-			})}
+			<Container>
+
+				<div>
+					<Droppable droppableId={'1'}>
+						{provided => (
+							<Container ref={provided.innerRef}
+								{...provided.droppableProps}>
+								<Draggable draggableId={'kek1'} index={0} {...provided}>
+									{provided => (
+										<Container
+											{...provided.draggableProps}
+											{...provided.dragHandleProps}
+											ref={provided.innerRef}
+										>
+											<CalcScreen value={0}/>
+										</Container>
+									)}
+								</Draggable>
+							</Container>
+						)}
+
+					</Droppable>
+
+					{/* <Draggable draggableId={'kek1'} index={0}>
+						{provided => (
+							<Container
+								{...provided.draggableProps}
+								{...provided.dragHandleProps}
+								ref={provided.innerRef}
+							>
+								<CalcScreen value={0}/>
+							</Container>
+						)}
+					</Draggable> */}
+				</div>
+				<div>
+123
+				</div>
+
+			</Container>
 		</DragDropContext>
 	);
 };
