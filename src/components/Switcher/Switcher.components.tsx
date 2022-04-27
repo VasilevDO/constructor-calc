@@ -2,7 +2,8 @@ import {useState} from 'react';
 import styled from 'styled-components';
 
 interface SwitcherProps {
-    values:string[]
+    values:string[],
+    action:(i:number)=>void
 }
 
 const StyledSwitcher = styled.div`
@@ -25,12 +26,12 @@ const StyledOption = styled.button<{active?:boolean}>`
     `;
 
 const Switcher = (props:SwitcherProps) => {
-	const {values} = props;
+	const {values, action} = props;
 
 	const [activeOption, setActiveOption] = useState(0);
 
 	const handleOptionClick = (i:number) => {
-		setActiveOption(i);
+		action(i);
 	};
 
 	return (

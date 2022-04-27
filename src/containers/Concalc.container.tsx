@@ -1,13 +1,18 @@
 import styled from 'styled-components';
-import {DragDropContext, DragStart, DragUpdate, Droppable, DropResult} from 'react-beautiful-dnd';
+import {useState} from 'react';
+import {DragDropContext, DragUpdate, DropResult} from 'react-beautiful-dnd';
+
 import CalcDigits from '../components/CalcDigits.component';
 import DraggableItem from '../models/DraggableItem.model';
 import CalcScreen from '../components/CalcScreen.component';
 import CalcOperations from '../components/CalcOperations.component';
 import CalcResolveButton from '../components/CalcResolveButton.component';
-import {useEffect, useState} from 'react';
 import DragDropCopyArea from '../components/DragDropCopyArea.component';
 import DragDropArea from '../components/DragDropArea';
+import Switcher from '../components/Switcher/Switcher.components';
+import {useSelector} from 'react-redux';
+import {RootState} from '../redux/store';
+import {useDispatch} from 'react-redux';
 
 type DragDropType = {
 	[key:string]:DraggableItem
@@ -21,23 +26,21 @@ type InitialStateType = {
 
 const Container = styled.div`
     display:flex;
+	flex-direction:column;
 	padding:20px;
 	border:3px solid gray;
-
 `;
 
-const DeleteContainer = styled.div`
-	background-color:blue;
-	opacity:0.3;
-	position:absolute;
-	top:0;
-	left:0;
-	right:0;
-	bottom:0;
+const CalcContainer = styled.div`
+	display:flex;
+	
 `;
 
 const Concalc = () => {
 	// Const switcherValues = ['Runtime', 'Constructor'];
+	const dispatch = useDispatch();
+
+	const concalcState = useSelector((state: RootState) => state.concalc);
 
 	const calcDigitsId = 'calc-digits';
 	const calcScreenId = 'calc-screen';
@@ -84,84 +87,64 @@ const Concalc = () => {
 
 		const item = components[draggableId];
 
+		const newConstructorArea = [...constructorArea];
+		const newComponentsArea = [...componentsArea];
+
 		if (source.droppableId === componentsAreaId) {
 			if (destination.droppableId === constructorAreaId) {
 				if (!constructorArea.find(u => u.id === item.id + copyPostfix)) {
 					const newItem = new DraggableItem(components[draggableId].item, `${components[draggableId].id}${copyPostfix}`, false);
 
-					const newConstructorArea = [...constructorArea].splice(destination.index, 0, newItem);
-					console.log(newConstructorArea);
-					const newComponentsArea = [...componentsArea].map(u => {
-						if (u.id === draggableId) {
-							u.lock();
-						}
-
-						return u;
-					});
-
-					const newState = {
-						...state,
-						componentsArea: newComponentsArea,
-						constructorArea: newConstructorArea,
-					};
-
-					setState(newState);
+					newConstructorArea.splice(destination.index, 0, newItem);
 				}
+			}
+		} else if (source.droppableId === constructorAreaId) {
+			if (!destination) {
+				newConstructorArea.splice(source.index, 1);
+			} else if (destination.droppableId === constructorAreaId) {
+				const item = constructorArea[source.index];
+				newConstructorArea.splice(source.index, 1);
+				newConstructorArea.splice(destination.index, 0, item);
 			}
 		}
 
-		console.log(state);
-		// If (source.droppableId === componentsAreaId) {
-		// 	if (!destination) {
-		// 		return;
-		// 	}
+		newComponentsArea.map(u => {
+			if (newConstructorArea.find(u2 => u2.id === `${u.id}${copyPostfix}`)) {
+				u.lock();
+			} else {
+				u.unlock();
+			}
 
-		// 	if (destination.droppableId === constructorAreaId) {
-		// 		if (constructorAreaItems.find(u => u.id === `${draggableId}${copyPostfix}`)) {
-		// 			return;
-		// 		}
+			return u;
+		});
 
-		// 		const newItem = new DraggableItem(dragDrop[draggableId].item, `${dragDrop[draggableId].id}${copyPostfix}`, false);
-		// 		const newConstructorAreaItems = Array.from(constructorAreaItems);
-		// 		newConstructorAreaItems.splice(destination.index, 0, newItem);
-		// 		setConstructorAreaItems(newConstructorAreaItems);
-		// 	}
-		// } else if (source.droppableId === constructorAreaId) {
-		// 	if (!destination) {
-		// 		const newConstructorAreaItems = [...constructorAreaItems];
-		// 		newConstructorAreaItems.splice(source.index, 1);
-		// 		setConstructorAreaItems(newConstructorAreaItems);
-		// 	} else if (destination.droppableId === constructorAreaId) {
-		// 		const item = constructorAreaItems[source.index];
-		// 		const newConstructorAreaItems = [...constructorAreaItems];
-		// 		newConstructorAreaItems.splice(source.index, 1);
-		// 		newConstructorAreaItems.splice(destination.index, 0, item);
-		// 		setConstructorAreaItems(newConstructorAreaItems);
-		// 	}
-		// }
+		const newState = {
+			...state,
+			componentsArea: newComponentsArea,
+			constructorArea: newConstructorArea,
+		};
+
+		setState(newState);
 	};
-
-	// UseEffect(() => {
-	// 	const newComponentsAreaItems = [...componentsAreaItems].map(u => {
-	// 		if (constructorAreaItems.find(u2 => u2.id === u.id + copyPostfix)) {
-	// 			u.lock();
-	// 		} else {
-	// 			u.unlock();
-	// 		}
-
-	// 		return u;
-	// 	});
-	// 	setComponentsAreaItems(newComponentsAreaItems);
-	// }, [constructorAreaItems]);
 
 	const componentsAreaItems = state.componentsArea;
 	const constructorAreaItems = state.constructorArea;
 
+	const switcherValues = ['open', 'close'];
+	const handleSwitcherChange = (i:number) => {
+		const newSwitcherValue = switcherValues[i];
+		console.log(newSwitcherValue);
+		dispatch({type: 'CLICK'});
+	};
+
 	return (
 		<DragDropContext onDragEnd={dragEndHandler} onDragUpdate={dragUpdateHandler}>
 			<Container>
-				<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true}/>
-				<DragDropArea id={constructorAreaId} items={constructorAreaItems}/>
+				<Switcher values={['open', 'close']} action={handleSwitcherChange}/>
+				<CalcContainer>
+					<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true}/>
+					<DragDropArea id={constructorAreaId} items={constructorAreaItems}/>
+				</CalcContainer>
 			</Container>
 		</DragDropContext>
 	);
