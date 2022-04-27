@@ -7,6 +7,7 @@ type CalcScreenProps = {
 const Container = styled.div`
     padding:5px;
     border:2px solid gray;
+	background-color: #CEF9F2;
 `;
 
 const CalcScreen = (props:CalcScreenProps) => {

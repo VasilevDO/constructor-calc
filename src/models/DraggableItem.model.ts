@@ -13,8 +13,12 @@ class DraggableItem {
 		this.isBlocked = isBlocked;
 	}
 
-	block() {
+	lock() {
 		this.isBlocked = true;
+	}
+
+	unlock() {
+		this.isBlocked = false;
 	}
 }
 

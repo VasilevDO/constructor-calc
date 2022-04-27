@@ -8,6 +8,7 @@ const Container = styled.div`
     padding:20px;
     border:2px solid gray;
     width:300px;  
+	background-color: yellow;
 `;
 
 const DraggableContainer = styled.div<{isDragging?:boolean}>`
@@ -32,6 +33,7 @@ const DragDropArea = (props:Props) => {
 							<Draggable draggableId={u.id} index={i} key={u.id} isDragDisabled={u.isBlocked}>
 								{(provided, snapshot) => (
 									<DraggableContainer
+										className={`draggable-${u.id}`}
 										{...provided.draggableProps}
 										{...provided.dragHandleProps}
 										ref={provided.innerRef}

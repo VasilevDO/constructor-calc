@@ -8,6 +8,7 @@ const Container = styled.div`
     padding:20px;
     border:2px solid gray;
     width:300px;  
+	background-color:red;
 `;
 
 const DraggableContainer = styled.div<{isDragging?:boolean}>`
@@ -27,8 +28,13 @@ const Clone = styled.div`
 	position:fixed;
 `;
 
-const ItemContainer = styled.div`
+const ItemContainer = styled.div <{isDisabled:boolean}>`
+	opacity:${props => props.isDisabled ? '0.5' : '1'};
 	position:relative;
+`;
+
+const BaseItemContainer = styled.div<{isDragging:boolean}>`
+	opacity:${props => props.isDragging ? '0.5' : 1}
 `;
 
 type Props={
@@ -49,8 +55,10 @@ const DragDropCopyArea = (props:Props) => {
 						items.map((u, i) => (
 							<Draggable draggableId={u.id} index={i} key={u.id} isDragDisabled={u.isBlocked}>
 								{(provided, snapshot) => (
-									<ItemContainer>
-										{u.item}
+									<ItemContainer isDisabled={u.isBlocked}>
+										<BaseItemContainer isDragging={snapshot.isDragging}>
+											{u.item}
+										</BaseItemContainer>
 										<DraggableContainer
 											{...provided.draggableProps}
 											{...provided.dragHandleProps}
@@ -58,13 +66,14 @@ const DragDropCopyArea = (props:Props) => {
 											isDragging={snapshot.isDragging}
 										>
 											{u.item}
-
 										</DraggableContainer>
 									</ItemContainer>
 								)}
 							</Draggable>))
 					}
-					{provided.placeholder}
+					{isLocked
+						? null
+						: provided.placeholder}
 				</Container>
 			)}
 		</Droppable>
