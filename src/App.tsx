@@ -1,8 +1,9 @@
+import {useSelector} from 'react-redux';
 import Concalc from './containers/Concalc.container';
 
 const App = () => {
-	console.log('kek');
-
+	const store = useSelector(store => store);
+	console.log(store);
 	return 	(
 		<Concalc/>
 	);

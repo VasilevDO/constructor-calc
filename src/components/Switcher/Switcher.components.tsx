@@ -1,10 +1,8 @@
-import {useState} from 'react';
+import {useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import styled from 'styled-components';
-
-interface SwitcherProps {
-    values:string[],
-    action:(i:number)=>void
-}
+import {RootState} from '../../redux/store';
+import {SWITCHER_VALUE_CHANGE} from '../../redux/switcher/switcher.type';
 
 const StyledSwitcher = styled.div`
     display:inline-flex;
@@ -25,18 +23,20 @@ const StyledOption = styled.button<{active?:boolean}>`
     transition: transform 1s;
     `;
 
-const Switcher = (props:SwitcherProps) => {
-	const {values, action} = props;
+const Switcher = () => {
+	const state = useSelector((state:RootState) => state.switcher);
+	const dispatch = useDispatch();
 
-	const [activeOption, setActiveOption] = useState(0);
+	const {values, currentValue} = state;
 
-	const handleOptionClick = (i:number) => {
-		action(i);
+	const handleSwitcherClick = (i:number) => {
+		const newValue = values[i];
+		dispatch({type: SWITCHER_VALUE_CHANGE, payload: newValue});
 	};
 
 	return (
 		<StyledSwitcher>
-			{values.map((u, i) => <StyledOption key={u + i} active={activeOption === i} value={i} onClick={() => handleOptionClick(i)}>{u}</StyledOption>)}
+			{values.map((u, i) => <StyledOption key={u + i} active={u === currentValue} value={i} onClick={() => handleSwitcherClick(i)}>{u}</StyledOption>)}
 		</StyledSwitcher>
 	);
 };

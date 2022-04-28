@@ -13,7 +13,6 @@ import Switcher from '../components/Switcher/Switcher.components';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {useDispatch} from 'react-redux';
-import {CONCALC_SWITCHER_STATE_CHANGE} from '../redux/types';
 
 type DragDropType = {
 	[key:string]:DraggableItem
@@ -131,16 +130,10 @@ const Concalc = () => {
 	const componentsAreaItems = state.componentsArea;
 	const constructorAreaItems = state.constructorArea;
 
-	const switcherValues = ['open', 'close'];
-	const handleSwitcherChange = (i:number) => {
-		const newSwitcherValue = switcherValues[i];
-		dispatch({type: CONCALC_SWITCHER_STATE_CHANGE, payload: newSwitcherValue});
-	};
-
 	return (
 		<DragDropContext onDragEnd={dragEndHandler} onDragUpdate={dragUpdateHandler}>
 			<Container>
-				<Switcher values={['open', 'close']} action={handleSwitcherChange}/>
+				<Switcher/>
 				<CalcContainer>
 					<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true}/>
 					<DragDropArea id={constructorAreaId} items={constructorAreaItems}/>
