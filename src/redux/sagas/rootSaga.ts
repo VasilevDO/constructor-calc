@@ -1,8 +1,8 @@
 import {fork} from 'redux-saga/effects';
-import {switcherSaga} from './concalc/concalcSagas';
+import {concalcWatcher} from './concalc/concalcSagas';
 
 function * rootSaga() {
-	yield fork(switcherSaga);
+	yield fork(concalcWatcher);
 }
 
 export default rootSaga;

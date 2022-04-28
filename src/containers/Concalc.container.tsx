@@ -13,6 +13,7 @@ import Switcher from '../components/Switcher/Switcher.components';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {useDispatch} from 'react-redux';
+import {CONCALC_SWITCHER_STATE_CHANGE} from '../redux/types';
 
 type DragDropType = {
 	[key:string]:DraggableItem
@@ -133,8 +134,7 @@ const Concalc = () => {
 	const switcherValues = ['open', 'close'];
 	const handleSwitcherChange = (i:number) => {
 		const newSwitcherValue = switcherValues[i];
-		console.log(newSwitcherValue);
-		dispatch({type: 'CLICK'});
+		dispatch({type: CONCALC_SWITCHER_STATE_CHANGE, payload: newSwitcherValue});
 	};
 
 	return (
