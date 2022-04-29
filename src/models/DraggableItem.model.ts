@@ -5,20 +5,12 @@ class DraggableItem {
 
 	id:string;
 
-	isBlocked:boolean;
+	isLocked:boolean;
 
-	constructor(component:ReactNode, id:string, isBlocked:boolean) {
+	constructor(component:ReactNode, id:string, isLocked:boolean) {
 		this.item = component;
 		this.id = id;
-		this.isBlocked = isBlocked;
-	}
-
-	lock() {
-		this.isBlocked = true;
-	}
-
-	unlock() {
-		this.isBlocked = false;
+		this.isLocked = isLocked;
 	}
 }
 

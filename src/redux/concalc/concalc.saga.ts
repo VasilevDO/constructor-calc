@@ -1,16 +1,26 @@
 import {put, takeEvery} from 'redux-saga/effects';
-import {CONCALC_SWITCHER_STATE_CHANGE, CONCALC_SWITCHER_STATE_CHANGE_SUCCESS} from './concalc.type';
 import {PayloadAction} from '@reduxjs/toolkit';
 
-export function * switcherStateChange(action:PayloadAction<string>) {
+import {CONCALC_COMPONENTS_AREA_SET, CONCALC_COMPONENTS_AREA_SET_S, CONCALC_CONSTRUCTOR_AREA_SET, CONCALC_CONSTRUCTOR_AREA_SET_S} from './concalc.type';
+
+export function * setComponentsArea(action:PayloadAction<string[]>) {
+	const {payload} = action;
+	yield put({
+		type: CONCALC_COMPONENTS_AREA_SET_S,
+		payload,
+	});
+}
+
+export function * setConstructorArea(action:PayloadAction<string[]>) {
 	const {payload} = action;
 	console.log(payload);
 	yield put({
-		type: CONCALC_SWITCHER_STATE_CHANGE_SUCCESS,
+		type: CONCALC_CONSTRUCTOR_AREA_SET_S,
 		payload,
 	});
 }
 
 export function * concalcWatcher() {
-	yield takeEvery(CONCALC_SWITCHER_STATE_CHANGE, switcherStateChange);
+	yield takeEvery(CONCALC_COMPONENTS_AREA_SET, setComponentsArea);
+	yield takeEvery(CONCALC_CONSTRUCTOR_AREA_SET, setConstructorArea);
 }

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {DragDropContext, DragUpdate, DropResult} from 'react-beautiful-dnd';
 
 import CalcDigits from '../components/CalcDigits.component';
@@ -13,16 +13,7 @@ import Switcher from '../components/Switcher/Switcher.components';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {useDispatch} from 'react-redux';
-
-type DragDropType = {
-	[key:string]:DraggableItem
-}
-
-type InitialStateType = {
-	components:DragDropType,
-	componentsArea:DraggableItem[],
-	constructorArea:DraggableItem[],
-}
+import {CONCALC_COMPONENTS_AREA_SET, CONCALC_CONSTRUCTOR_AREA_SET} from '../redux/concalc/concalc.type';
 
 const Container = styled.div`
     display:flex;
@@ -37,40 +28,74 @@ const CalcContainer = styled.div`
 `;
 
 const Concalc = () => {
-	// Const switcherValues = ['Runtime', 'Constructor'];
 	const dispatch = useDispatch();
 
-	const concalcState = useSelector((state: RootState) => state.concalc);
+	const state = useSelector((state: RootState) => state.concalc);
+	const {componentsArea, constructorArea} = state;
+
+	const switcherState = useSelector((state:RootState) => state.switcher);
+	const {values, currentValue} = switcherState;
 
 	const calcDigitsId = 'calc-digits';
 	const calcScreenId = 'calc-screen';
 	const calcOperationsId = 'calc-operations';
 	const calcResolveButtonId = 'calc-resolve';
 
-	const dragDrop:DragDropType = {
-		[calcDigitsId]: new DraggableItem(<CalcDigits/>, calcDigitsId, false),
-		[calcScreenId]: new DraggableItem(<CalcScreen value={0}/>, calcScreenId, false),
-		[calcOperationsId]: new DraggableItem(<CalcOperations/>, calcOperationsId, false),
-		[calcResolveButtonId]: new DraggableItem(<CalcResolveButton/>, calcResolveButtonId, false),
-	};
+	const dragDrop = new Map()
+		.set(calcScreenId, <CalcScreen value={0}/>)
+		.set(calcOperationsId, <CalcOperations/>)
+		.set(calcDigitsId, <CalcDigits/>)
+		.set(calcResolveButtonId, <CalcResolveButton/>);
 
 	const componentsAreaId = 'components-area';
 	const constructorAreaId = 'constructor-area';
 
-	const copyPostfix = '-copy';
+	useEffect(() => {
+		const componentsArea = Array.from(dragDrop.keys());
+		dispatch({
+			type: CONCALC_COMPONENTS_AREA_SET,
+			payload: componentsArea,
+		});
+	}, []);
 
-	const initState:InitialStateType = {
-		components: dragDrop,
-		componentsArea: [dragDrop[calcScreenId], dragDrop[calcOperationsId], dragDrop[calcDigitsId], dragDrop[calcResolveButtonId]],
-		constructorArea: [],
+	const dragEndHandler = (res:DropResult) => {
+		const {destination, draggableId, source} = res;
+
+		const itemId = draggableId.split('/')[1];
+
+		const newConstructorArea = Array.from(constructorArea);
+
+		if (source.droppableId === componentsAreaId) {
+			if (!destination) {
+				return;
+			}
+
+			if (destination.droppableId === constructorAreaId) {
+				if (constructorArea.includes(itemId)) {
+					return;
+				}
+
+				newConstructorArea.splice(destination.index, 0, itemId);
+			}
+		} else if (source.droppableId === constructorAreaId) {
+			if (!destination) {
+				newConstructorArea.splice(source.index, 1);
+			} else if (destination.droppableId === constructorAreaId) {
+				newConstructorArea.splice(source.index, 1);
+				newConstructorArea.splice(destination.index, 0, itemId);
+			}
+		}
+
+		dispatch({
+			type: CONCALC_CONSTRUCTOR_AREA_SET,
+			payload: newConstructorArea,
+		});
 	};
-
-	const [state, setState] = useState(initState);
 
 	const dragUpdateHandler = (status:DragUpdate) => {
 		const {destination, draggableId, source} = status;
 		if (source.droppableId === constructorAreaId) {
-			const target = document.querySelector(`.draggable-${draggableId}`);
+			const target = document.querySelector('.draggable-active');
 			if (destination) {
 				target.classList.remove('almost-zero-animation');
 			} else {
@@ -79,64 +104,22 @@ const Concalc = () => {
 		}
 	};
 
-	const dragEndHandler = (res:DropResult) => {
-		console.log(res);
-		const {destination, draggableId, source} = res;
-
-		const {componentsArea, constructorArea, components} = state;
-
-		const item = components[draggableId];
-
-		const newConstructorArea = [...constructorArea];
-		const newComponentsArea = [...componentsArea];
-
-		if (source.droppableId === componentsAreaId) {
-			if (destination.droppableId === constructorAreaId) {
-				if (!constructorArea.find(u => u.id === item.id + copyPostfix)) {
-					const newItem = new DraggableItem(components[draggableId].item, `${components[draggableId].id}${copyPostfix}`, false);
-
-					newConstructorArea.splice(destination.index, 0, newItem);
-				}
-			}
-		} else if (source.droppableId === constructorAreaId) {
-			if (!destination) {
-				newConstructorArea.splice(source.index, 1);
-			} else if (destination.droppableId === constructorAreaId) {
-				const item = constructorArea[source.index];
-				newConstructorArea.splice(source.index, 1);
-				newConstructorArea.splice(destination.index, 0, item);
-			}
-		}
-
-		newComponentsArea.map(u => {
-			if (newConstructorArea.find(u2 => u2.id === `${u.id}${copyPostfix}`)) {
-				u.lock();
-			} else {
-				u.unlock();
-			}
-
-			return u;
-		});
-
-		const newState = {
-			...state,
-			componentsArea: newComponentsArea,
-			constructorArea: newConstructorArea,
-		};
-
-		setState(newState);
-	};
-
-	const componentsAreaItems = state.componentsArea;
-	const constructorAreaItems = state.constructorArea;
+	const componentsAreaItems = componentsArea.map(u => {
+		const isLocked = Boolean(constructorArea.includes(u));
+		return new DraggableItem(dragDrop.get(u), u, isLocked);
+	});
+	const constructorAreaItems = constructorArea.map(u => {
+		const isLocked = values.indexOf(currentValue) === 1;
+		return new DraggableItem(dragDrop.get(u), u, isLocked);
+	});
 
 	return (
 		<DragDropContext onDragEnd={dragEndHandler} onDragUpdate={dragUpdateHandler}>
 			<Container>
 				<Switcher/>
 				<CalcContainer>
-					<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true}/>
-					<DragDropArea id={constructorAreaId} items={constructorAreaItems}/>
+					<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true} isDragMode={values.indexOf(currentValue) === 0}/>
+					<DragDropArea id={constructorAreaId} items={constructorAreaItems} isDragMode={values.indexOf(currentValue) === 0}/>
 				</CalcContainer>
 			</Container>
 		</DragDropContext>
