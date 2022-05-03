@@ -5,10 +5,10 @@ import DraggableItem from '../models/DraggableItem.model';
 const Container = styled.div`
     display:flex;
     flex-direction:column;
-    padding:20px;
-    border:2px solid gray;
-    width:300px;  
-	background-color:red;
+
+	> *:not(:last-child) {
+		margin-bottom:12px;
+	}
 `;
 
 const DraggableContainer = styled.div<{isDragging?:boolean, isDragMode:boolean}>`
@@ -20,7 +20,6 @@ const DraggableContainer = styled.div<{isDragging?:boolean, isDragMode:boolean}>
 	z-index:9999;
 
 	* {
-		// pointer-events:${props => props.isDragMode ? 'none' : 'auto'}
 		pointer-events:none;
 	}
 `;
@@ -61,6 +60,7 @@ const DragDropCopyArea = (props:Props) => {
 											{u.item}
 										</BaseItemContainer>
 										<DraggableContainer
+											className={snapshot.isDragging ? 'draggable-active almost-zero-animation' : ''}
 											{...provided.draggableProps}
 											{...provided.dragHandleProps}
 											ref={provided.innerRef}

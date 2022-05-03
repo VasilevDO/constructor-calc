@@ -2,13 +2,16 @@ import {Draggable, Droppable} from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import DraggableItem from '../models/DraggableItem.model';
 
-const Container = styled.div`
-    display:flex;
+const Container = styled.div<{isEmpty:boolean}>`
+    width:240px;
+	display:flex;
     flex-direction:column;
-    padding:20px;
-    border:2px solid gray;
-    width:300px;  
-	background-color: yellow;
+
+	border:${props => props.isEmpty ? '2px dashed black' : 'none'}
+
+	> *:not(:last-child) {
+		margin-bottom:12px;
+	}
 `;
 
 const DraggableContainer = styled.div<{isDragging?:boolean, isDragMode:boolean}>`
@@ -27,20 +30,25 @@ type Props={
 
 const DragDropArea = (props:Props) => {
 	const {items, id, isLocked, isDragMode} = props;
+
+	console.log(items);
 	return (
 		<Droppable droppableId={id} isDropDisabled={isLocked === undefined ? false : isLocked}>
 			{provided => (
-				<Container ref={provided.innerRef}
-					{...provided.droppableProps}>
+				<Container
+					ref={provided.innerRef}
+					{...provided.droppableProps}
+					isEmpty={Boolean(items.length)}
+				>
 					{
 						items.map((u, i) => (
 							<Draggable draggableId={`${id}/${u.id}`} index={i} key={u.id} isDragDisabled={u.isLocked}>
 								{(provided, snapshot) => (
 									<DraggableContainer
-										className={snapshot.isDragging ? 'draggable-active' : ''}
 										{...provided.draggableProps}
 										{...provided.dragHandleProps}
 										ref={provided.innerRef}
+										className={snapshot.isDragging ? 'draggable-active' : ''}
 										isDragging={snapshot.isDragging}
 										isDragMode={isDragMode}
 									>

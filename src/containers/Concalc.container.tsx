@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import {useEffect, useState} from 'react';
-import {DragDropContext, DragUpdate, DropResult} from 'react-beautiful-dnd';
+import {useEffect} from 'react';
+import {DragDropContext, DragStart, DragUpdate, DropResult} from 'react-beautiful-dnd';
 
 import CalcDigits from '../components/CalcDigits.component';
 import DraggableItem from '../models/DraggableItem.model';
@@ -13,7 +13,8 @@ import Switcher from '../components/Switcher/Switcher.components';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {useDispatch} from 'react-redux';
-import {CONCALC_COMPONENTS_AREA_SET, CONCALC_CONSTRUCTOR_AREA_SET} from '../redux/concalc/concalc.type';
+import {ConcalcActionTypes} from '../redux/concalc/concalc.type';
+import MathOperator from '../models/MathOperator.model';
 
 const Container = styled.div`
     display:flex;
@@ -38,14 +39,38 @@ const Concalc = () => {
 
 	const calcDigitsId = 'calc-digits';
 	const calcScreenId = 'calc-screen';
+	const calcScreenDisabledId = 'calc-screen-disabled';
 	const calcOperationsId = 'calc-operations';
 	const calcResolveButtonId = 'calc-resolve';
 
+	const handleDigitsAction = (val:string) => {
+		dispatch({
+			type: ConcalcActionTypes.CONCALC_DIGITS_ACTION,
+			payload: val,
+		});
+	};
+
+	const handleOperationsAction = (operator:MathOperator) => {
+		dispatch({
+			type: ConcalcActionTypes.CONCALC_OPERATOR_ACTION,
+			payload: operator,
+		});
+	};
+
+	const handleResolveAction = () => {
+		dispatch({
+			type: ConcalcActionTypes.CONCALC_RESOLVE,
+		});
+	};
+
+	const screenValue = state.screen;
+
 	const dragDrop = new Map()
-		.set(calcScreenId, <CalcScreen value={0}/>)
-		.set(calcOperationsId, <CalcOperations/>)
-		.set(calcDigitsId, <CalcDigits/>)
-		.set(calcResolveButtonId, <CalcResolveButton/>);
+		.set(calcScreenId, <CalcScreen value={screenValue} />)
+		.set(calcScreenDisabledId, <CalcScreen value={'0'} />)
+		.set(calcOperationsId, <CalcOperations action={handleOperationsAction}/>)
+		.set(calcDigitsId, <CalcDigits action={handleDigitsAction}/>)
+		.set(calcResolveButtonId, <CalcResolveButton action={handleResolveAction}/>);
 
 	const componentsAreaId = 'components-area';
 	const constructorAreaId = 'constructor-area';
@@ -53,7 +78,7 @@ const Concalc = () => {
 	useEffect(() => {
 		const componentsArea = Array.from(dragDrop.keys());
 		dispatch({
-			type: CONCALC_COMPONENTS_AREA_SET,
+			type: ConcalcActionTypes.CONCALC_COMPONENTS_AREA_SET,
 			payload: componentsArea,
 		});
 	}, []);
@@ -87,34 +112,44 @@ const Concalc = () => {
 		}
 
 		dispatch({
-			type: CONCALC_CONSTRUCTOR_AREA_SET,
+			type: ConcalcActionTypes.CONCALC_CONSTRUCTOR_AREA_SET,
 			payload: newConstructorArea,
 		});
 	};
 
 	const dragUpdateHandler = (status:DragUpdate) => {
 		const {destination, draggableId, source} = status;
-		if (source.droppableId === constructorAreaId) {
-			const target = document.querySelector('.draggable-active');
-			if (destination) {
-				target.classList.remove('almost-zero-animation');
-			} else {
-				target.classList.add('almost-zero-animation');
-			}
+		const target = document.querySelector('.draggable-active');
+		if (destination) {
+			target.classList.remove('almost-zero-animation');
+		} else {
+			target.classList.add('almost-zero-animation');
 		}
 	};
 
-	const componentsAreaItems = componentsArea.map(u => {
+	const dragStartHandler = (start:DragStart) => {
+		const {source} = start;
+		if (source.droppableId === componentsAreaId) {
+			const target = document.querySelector('.draggable-active');
+			target.classList.add('almost-zero-animation');
+		}
+	};
+
+	const componentsAreaItems = componentsArea.filter(u => u !== calcScreenId).map(u => {
 		const isLocked = Boolean(constructorArea.includes(u));
 		return new DraggableItem(dragDrop.get(u), u, isLocked);
 	});
 	const constructorAreaItems = constructorArea.map(u => {
 		const isLocked = values.indexOf(currentValue) === 1;
+		if (u === calcScreenDisabledId) {
+			return new DraggableItem(dragDrop.get(calcScreenId), u, isLocked);
+		}
+
 		return new DraggableItem(dragDrop.get(u), u, isLocked);
 	});
 
 	return (
-		<DragDropContext onDragEnd={dragEndHandler} onDragUpdate={dragUpdateHandler}>
+		<DragDropContext onDragStart={dragStartHandler} onDragEnd={dragEndHandler} onDragUpdate={dragUpdateHandler}>
 			<Container>
 				<Switcher/>
 				<CalcContainer>
