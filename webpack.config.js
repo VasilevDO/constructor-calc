@@ -2,8 +2,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 
-module.exports = {
+module.exports = (env, argv) => ({
 	entry: ['./src/index.js'],
 	output: {
 		path: path.resolve(__dirname, 'dist'),
@@ -64,11 +65,11 @@ module.exports = {
 			},
 		],
 	},
-	performance: {
-		maxEntrypointSize: 512000,
-		maxAssetSize: 512000,
+	optimization: {
+		minimize: argv.mode === 'production',
+		minimizer: [new TerserPlugin()],
 	},
 	devServer: {
 		historyApiFallback: true,
 	},
-};
+});

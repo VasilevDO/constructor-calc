@@ -7,6 +7,7 @@ const Container = styled.button<{width:string}>`
 	border: 1px solid #E2E3E5;
 	border-radius: 6px;
 	user-select: none;
+	cursor: pointer;
 
 	&:hover {
 		border: 2px solid #5D5FEF;

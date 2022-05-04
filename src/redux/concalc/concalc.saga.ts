@@ -17,7 +17,7 @@ const cut = (val:number) => {
 
 	if (String(val).length > screenCharsMax) {
 		if (val % 1) {
-			const [charsBeforeDot, charsAfterDot] = String(val).split('.');
+			const [charsBeforeDot] = String(val).split('.');
 			if (charsBeforeDot.length <= screenCharsMax - 2) {
 				const fixedVal = val.toFixed(screenCharsMax - charsBeforeDot.length - 1);
 				if (Number(fixedVal) !== 0) {
@@ -41,8 +41,6 @@ const calculate = () => {
 
 	const a = storedNumber;
 	const b = getScreenValue();
-	console.log(a);
-	console.log(b);
 
 	const res = fn(a, b);
 	if (isNaN(res)) {

@@ -1,14 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import 'bootstrap';
+import {Provider} from 'react-redux';
 
 import App from './App';
 import store from './redux/store';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.scss';
-import {Provider} from 'react-redux';
 
 const app = (
 	<React.StrictMode>
