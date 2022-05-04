@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import ButtonMain from './ButtonMain.component';
 
 const Container = styled.div`
     display: grid;
@@ -7,13 +8,9 @@ const Container = styled.div`
 	background: #FFFFFF;
 	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06), 0px 4px 6px rgba(0, 0, 0, 0.1);
 	border-radius: 4px;
-`;
-
-const StyledButton = styled.button`
-    height:48px;
-	background: #5D5FEF;
-	border-radius: 6px;
-	color:white;
+	> button {
+		background-color: #5D5FEF;
+	}
 `;
 
 interface CalcResolveButtonI {
@@ -30,7 +27,7 @@ const CalcResolveButton = (props:CalcResolveButtonI) => {
 
 	return (
 		<Container>
-			<StyledButton type="button" className="btn btn-light" onClick={() => handleButtonClick()}>{buttonText}</StyledButton>
+			<ButtonMain action={() => handleButtonClick()} text={buttonText}/>
 		</Container>
 	);
 };

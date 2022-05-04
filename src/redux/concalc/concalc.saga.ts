@@ -15,15 +15,13 @@ const cut = (val:number) => {
 	const state = store.getState().concalc;
 	const {screenCharsMax} = state;
 
-	console.log(val);
-
 	if (String(val).length > screenCharsMax) {
 		if (val % 1) {
 			const [charsBeforeDot, charsAfterDot] = String(val).split('.');
 			if (charsBeforeDot.length <= screenCharsMax - 2) {
 				const fixedVal = val.toFixed(screenCharsMax - charsBeforeDot.length - 1);
 				if (Number(fixedVal) !== 0) {
-					return fixedVal;
+					return Number(fixedVal.replace(/0+$/, ''));
 				}
 			}
 		}

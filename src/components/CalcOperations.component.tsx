@@ -1,24 +1,16 @@
 import styled from 'styled-components';
 import MathOperator from '../models/MathOperator.model';
+import ButtonMain from './ButtonMain.component';
 
 const Container = styled.div`
     display: grid;
     padding:4px;
     width:240px;
     grid-template-columns:repeat(4,auto);
-    grid-column-gap: 8px;
-    grid-row-gap: 8px;
 	background: #FFFFFF;
+	justify-content: space-between;
 	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06), 0px 4px 6px rgba(0, 0, 0, 0.1);
 	border-radius: 4px;
-`;
-
-const StyledButton = styled.button`
-    height:48px;
-	background: #FFFFFF;
-	border: 1px solid #E2E3E5;
-	box-sizing: border-box;
-	border-radius: 6px;
 `;
 
 interface CalcOperationsI {
@@ -40,10 +32,12 @@ const CalcOperations = (props:CalcOperationsI) => {
 		action(operator);
 	};
 
+	const buttonsWidth = '52px';
+
 	return (
 		<Container>
 			{operations.map((u, i) =>
-				<StyledButton key={u.symbol} type="button" className="btn btn-light" onClick={() => handleClick(i)}>{u.symbol}</StyledButton>,
+				<ButtonMain key={u.symbol} action={() => handleClick(i)} text={u.symbol} width={buttonsWidth}/>,
 			)}
 		</Container>
 	);

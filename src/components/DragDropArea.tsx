@@ -1,23 +1,36 @@
 import {Draggable, Droppable} from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import DraggableItem from '../models/DraggableItem.model';
+import DragDropHint from './DragDropHint.components';
 
-const Container = styled.div<{isEmpty:boolean}>`
-    width:240px;
-	display:flex;
-    flex-direction:column;
+const Container = styled.div<{isEmpty:boolean, isDraggingOver:boolean}>`
+    position:relative;
+	width:240px;
 
-	border:${props => props.isEmpty ? '2px dashed black' : 'none'}
+	display: grid;
+	grid-template-columns:240px;
+	justify-content: center;
+	align-content: start;
+	grid-row-gap: 12px;
 
-	> *:not(:last-child) {
-		margin-bottom:12px;
-	}
+	box-sizing: border-box;
+	border-radius: 6px;
+	background-color: #FFFFFF;
+	background-color: ${props => props.isDraggingOver ? '#F0F9FF' : '#FFFFFF'};
+	border:${props => props.isEmpty ? '2px dashed #C4C4C4' : 'none'}
 `;
 
 const DraggableContainer = styled.div<{isDragging?:boolean, isDragMode:boolean}>`
 	* {
 		pointer-events:${props => props.isDragMode ? 'none' : 'auto'}
 	}
+`;
+
+const HintContainer = styled.div`
+	position:absolute;
+	top:50%;
+	left:50%;
+	transform: translate(-50%,-50%);
 `;
 
 type Props={
@@ -31,17 +44,18 @@ type Props={
 const DragDropArea = (props:Props) => {
 	const {items, id, isLocked, isDragMode} = props;
 
-	console.log(items);
 	return (
-		<Droppable droppableId={id} isDropDisabled={isLocked === undefined ? false : isLocked}>
-			{provided => (
+		<Droppable droppableId={id} isDropDisabled={isLocked === undefined ? false : isLocked} >
+
+			{(provided, snapshot) => (
 				<Container
 					ref={provided.innerRef}
 					{...provided.droppableProps}
-					isEmpty={Boolean(items.length)}
+					isEmpty={!items.length}
+					isDraggingOver={snapshot.isDraggingOver}
 				>
-					{
-						items.map((u, i) => (
+					{	items.length
+						? items.map((u, i) => (
 							<Draggable draggableId={`${id}/${u.id}`} index={i} key={u.id} isDragDisabled={u.isLocked}>
 								{(provided, snapshot) => (
 									<DraggableContainer
@@ -57,10 +71,14 @@ const DragDropArea = (props:Props) => {
 								)
 								}
 							</Draggable>))
+						: <HintContainer>
+							<DragDropHint/>
+						</HintContainer>
 					}
 					{provided.placeholder}
 				</Container>
-			)}
+			)
+			}
 		</Droppable>
 	);
 };

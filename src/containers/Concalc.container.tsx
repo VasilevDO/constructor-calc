@@ -9,7 +9,7 @@ import CalcOperations from '../components/CalcOperations.component';
 import CalcResolveButton from '../components/CalcResolveButton.component';
 import DragDropCopyArea from '../components/DragDropCopyArea.component';
 import DragDropArea from '../components/DragDropArea';
-import Switcher from '../components/Switcher/Switcher.components';
+import Switcher from '../components/Switcher.components';
 import {useSelector} from 'react-redux';
 import {RootState} from '../redux/store';
 import {useDispatch} from 'react-redux';
@@ -17,15 +17,18 @@ import {ConcalcActionTypes} from '../redux/concalc/concalc.type';
 import MathOperator from '../models/MathOperator.model';
 
 const Container = styled.div`
-    display:flex;
-	flex-direction:column;
-	padding:20px;
-	border:3px solid gray;
-`;
+    display:grid;
+	grid-template-columns:repeat(2,240px);
+	justify-content: center;
+	grid-gap: 30px 60px;
 
-const CalcContainer = styled.div`
-	display:flex;
-	
+	border: 2px solid #E2E3E5;
+	padding:20px;
+
+	> :first-child {
+		grid-column-start: 2;
+		justify-self: center;
+	}
 `;
 
 const Concalc = () => {
@@ -140,7 +143,7 @@ const Concalc = () => {
 		return new DraggableItem(dragDrop.get(u), u, isLocked);
 	});
 	const constructorAreaItems = constructorArea.map(u => {
-		const isLocked = values.indexOf(currentValue) === 1;
+		const isLocked = values.indexOf(currentValue) === 0;
 		if (u === calcScreenDisabledId) {
 			return new DraggableItem(dragDrop.get(calcScreenId), u, isLocked);
 		}
@@ -152,10 +155,8 @@ const Concalc = () => {
 		<DragDropContext onDragStart={dragStartHandler} onDragEnd={dragEndHandler} onDragUpdate={dragUpdateHandler}>
 			<Container>
 				<Switcher/>
-				<CalcContainer>
-					<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true} isDragMode={values.indexOf(currentValue) === 0}/>
-					<DragDropArea id={constructorAreaId} items={constructorAreaItems} isDragMode={values.indexOf(currentValue) === 0}/>
-				</CalcContainer>
+				<DragDropCopyArea id={componentsAreaId} items={componentsAreaItems} isLocked={true} isDragMode={values.indexOf(currentValue) === 1}/>
+				<DragDropArea id={constructorAreaId} items={constructorAreaItems} isDragMode={values.indexOf(currentValue) === 1}/>
 			</Container>
 		</DragDropContext>
 	);

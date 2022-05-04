@@ -1,7 +1,7 @@
 import {PayloadAction} from '@reduxjs/toolkit';
 import {SWITCHER_VALUE_CHANGE_S} from './switcher.type';
 
-const initialValues = ['open', 'close'];
+const initialValues = ['Runtime', 'Constructor'];
 const startingValue = initialValues[0];
 
 const init = {

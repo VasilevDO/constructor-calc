@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import ButtonMain from './ButtonMain.component';
 
 const Container = styled.div`
     display: grid;
@@ -10,15 +11,9 @@ const Container = styled.div`
 	background: #FFFFFF;
 	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06), 0px 4px 6px rgba(0, 0, 0, 0.1);
 	border-radius: 4px;
-`;
-
-const StyledButton = styled.button<{width: number}>`
-    grid-column: span ${props => props.width};
-    height:48px;
-	background: #FFFFFF;
-	border: 1px solid #E2E3E5;
-	box-sizing: border-box;
-	border-radius: 6px;
+	> button:nth-child(10) {
+		grid-column: span 2;
+	}
 `;
 
 type CalcDigitsProps={
@@ -33,10 +28,14 @@ const CalcDigits = (props:CalcDigitsProps) => {
 		action(digits[i]);
 	};
 
+	const buttonWidth = '72px';
+
+	const zeroButtonWidth = `${(parseInt(buttonWidth, 10) * 2)}px`;
+
 	return (
 		<Container>
 			{digits.map((u, i) =>
-				<StyledButton key={u} width={u === '0' ? 2 : 1} type="button" className="btn btn-light" onClick={() => handleClick(i)}>{u}</StyledButton>,
+				<ButtonMain key={u} width={u === '0' ? zeroButtonWidth : buttonWidth} action = {() => handleClick(i)} text={u} />,
 			)}
 		</Container>
 	);
