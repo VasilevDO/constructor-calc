@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {useEffect} from 'react';
+import {useEffect, useMemo} from 'react';
 import {DragDropContext, DragStart, DragUpdate, DropResult} from 'react-beautiful-dnd';
 
 import CalcDigits from '../components/CalcDigits.component';
@@ -36,7 +36,6 @@ const Concalc = () => {
 
 	const state = useSelector((state: RootState) => state.concalc);
 
-	console.log(state);
 	const {componentsArea, constructorArea} = state;
 
 	const switcherState = useSelector((state:RootState) => state.switcher);
@@ -144,6 +143,7 @@ const Concalc = () => {
 		const isLocked = Boolean(constructorArea.includes(u));
 		return new DraggableItem(dragDrop.get(u), u, isLocked);
 	});
+
 	const constructorAreaItems = constructorArea.map(u => {
 		const isLocked = values.indexOf(currentValue) === 0;
 		if (u === calcScreenDisabledId) {

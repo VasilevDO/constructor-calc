@@ -88,10 +88,7 @@ const calculate = ():number => {
 	return res;
 };
 
-const filterScreen = (str:string) => {
-	const trimmedZeroes = str.replace(/^0(?!,)/g, '');
-	return trimmedZeroes.replace(/[^0-9,]/g, '');
-};
+const filterScreen = (str:string) => str.replace(/^0(?!,)/g, '').replace(/[^0-9,]/g, '').replace(/^,$/, '0,');
 
 export function * setComponentsArea(action:PayloadAction<string[]>) {
 	const {payload} = action;
@@ -179,6 +176,7 @@ export function * handleDigitsAction(action:PayloadAction<string>) {
 }
 
 export function * concalcWatcher() {
+	console.log('ASWokdp')
 	yield takeEvery(ConcalcActionTypes.CONCALC_COMPONENTS_AREA_SET, setComponentsArea);
 	yield takeEvery(ConcalcActionTypes.CONCALC_CONSTRUCTOR_AREA_SET, setConstructorArea);
 	yield takeEvery(ConcalcActionTypes.CONCALC_RESOLVE, resolve);
