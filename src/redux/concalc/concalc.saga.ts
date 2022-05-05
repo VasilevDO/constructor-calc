@@ -176,7 +176,6 @@ export function * handleDigitsAction(action:PayloadAction<string>) {
 }
 
 export function * concalcWatcher() {
-	console.log('ASWokdp')
 	yield takeEvery(ConcalcActionTypes.CONCALC_COMPONENTS_AREA_SET, setComponentsArea);
 	yield takeEvery(ConcalcActionTypes.CONCALC_CONSTRUCTOR_AREA_SET, setConstructorArea);
 	yield takeEvery(ConcalcActionTypes.CONCALC_RESOLVE, resolve);
