@@ -18,6 +18,7 @@ const StyledOption = styled.button<{active?:boolean}>`
     background-color:${props => props.active ? '#FFFFFF' : 'none'};
     transition: transform 1s;
     padding:8px 12px;
+	cursor:pointer;
     `;
 
 const Switcher = () => {

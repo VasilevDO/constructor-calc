@@ -36,7 +36,7 @@ const InnerContainer = styled.div`
 const CalcScreen = (props:CalcScreenProps) => {
 	const {value, disabled = false} = props;
 	const placeholder = '0';
-	const valueToRender = disabled ? placeholder : String(value).split('.').join(',');
+	const valueToRender = disabled ? placeholder : value;
 	return (
 		<Container disabled={disabled}>
 			<InnerContainer>

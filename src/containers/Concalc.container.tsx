@@ -35,6 +35,8 @@ const Concalc = () => {
 	const dispatch = useDispatch();
 
 	const state = useSelector((state: RootState) => state.concalc);
+
+	console.log(state);
 	const {componentsArea, constructorArea} = state;
 
 	const switcherState = useSelector((state:RootState) => state.switcher);

@@ -5,13 +5,50 @@ import store, {RootState} from '../store';
 import {ConcalcState} from './concalc.reducer';
 import MathOperator from '../../models/MathOperator.model';
 
-const getScreenValue = () => {
+export function * setScreen(value:string|number|null) {
+	let valueToSet;
+	if (!value) {
+		valueToSet = '0';
+	} else if (typeof value === 'number') {
+		valueToSet = String(value).replace(/\./, ',');
+	} else {
+		valueToSet = value.replace(/\./, ',');
+	}
+
+	yield put({
+		type: ConcalcActionTypes.CONCALC_SCREEN_SET_S,
+		payload: valueToSet,
+	});
+}
+
+export function * storeOperator(operator:MathOperator) {
+	yield put({
+		type: ConcalcActionTypes.CONCALC_STORE_OPERATOR_S,
+		payload: operator,
+	});
+}
+
+export function * storeNumber(value:number|string|null) {
+	let valueToStore;
+	if (typeof value === 'string') {
+		valueToStore = Number(value.replace(/,/g, '.'));
+	} else {
+		valueToStore = value;
+	}
+
+	yield put({
+		type: ConcalcActionTypes.CONCALC_STORE_NUMBER_S,
+		payload: valueToStore,
+	});
+}
+
+const getScreenValue = ():number => {
 	const state = store.getState().concalc;
 	const {screen} = state;
 	return Number(screen.replace(/,/g, '.'));
 };
 
-const cut = (val:number) => {
+const cut = (val:number):string => {
 	const state = store.getState().concalc;
 	const {screenCharsMax} = state;
 
@@ -21,7 +58,7 @@ const cut = (val:number) => {
 			if (charsBeforeDot.length <= screenCharsMax - 2) {
 				const fixedVal = val.toFixed(screenCharsMax - charsBeforeDot.length - 1);
 				if (Number(fixedVal) !== 0) {
-					return Number(fixedVal.replace(/0+$/, ''));
+					return fixedVal.replace(/0+$/, '');
 				}
 			}
 		}
@@ -31,10 +68,10 @@ const cut = (val:number) => {
 		return val.toExponential(fractionDigits);
 	}
 
-	return val;
+	return String(val);
 };
 
-const calculate = () => {
+const calculate = ():number => {
 	const state = store.getState().concalc;
 	const {storedNumber, storedOperator} = state;
 	const {fn} = storedOperator;
@@ -43,11 +80,10 @@ const calculate = () => {
 	const b = getScreenValue();
 
 	const res = fn(a, b);
+
 	if (isNaN(res)) {
 		throw new Error('calculation failed');
 	}
-
-	console.log(res);
 
 	return res;
 };
@@ -73,43 +109,10 @@ export function * setConstructorArea(action:PayloadAction<string[]>) {
 	});
 }
 
-export function * setScreenValue(action:PayloadAction<string>) {
-	const {payload} = action;
-	yield put({
-		type: ConcalcActionTypes.CONCALC_SCREEN_SET_S,
-		payload,
-	});
-}
-
-export function * storeNumber(action:PayloadAction<string>) {
-	const payload = Number(action.payload);
-	yield put({
-		type: ConcalcActionTypes.CONCALC_STORE_NUMBER_S,
-		payload,
-	});
-}
-
 export function * reset() {
-	yield put({
-		type: ConcalcActionTypes.CONCALC_STORE_OPERATOR,
-		payload: null,
-	});
-	yield put({
-		type: ConcalcActionTypes.CONCALC_STORE_NUMBER_S,
-		payload: null,
-	});
-	yield put({
-		type: ConcalcActionTypes.CONCALC_SCREEN_SET_S,
-		payload: 0,
-	});
-}
-
-export function * storeOperator(action:PayloadAction<string>) {
-	const {payload} = action;
-	yield put({
-		type: ConcalcActionTypes.CONCALC_STORE_OPERATOR_S,
-		payload,
-	});
+	yield storeOperator(null);
+	yield storeNumber(null);
+	yield setScreen(null);
 }
 
 export function * resolve() {
@@ -124,18 +127,9 @@ export function * resolve() {
 
 		const calculatedValue = cut(calculate());
 
-		yield put({
-			type: ConcalcActionTypes.CONCALC_STORE_OPERATOR,
-			payload: null,
-		});
-		yield put({
-			type: ConcalcActionTypes.CONCALC_STORE_NUMBER_S,
-			payload: null,
-		});
-		yield put({
-			type: ConcalcActionTypes.CONCALC_SCREEN_SET_S,
-			payload: calculatedValue,
-		});
+		yield storeOperator(null);
+		yield storeNumber(null);
+		yield setScreen(calculatedValue);
 	} catch (e) {
 		console.log(e);
 		yield reset();
@@ -147,30 +141,17 @@ export function * handleOperatorAction(action:PayloadAction<MathOperator>) {
 		const {payload} = action;
 		const state:ConcalcState = yield select((state:RootState) => state.concalc);
 		const {storedOperator, screen} = state;
-		if (!isNaN(Number(screen))) {
-			if (storedOperator) {
-				const calculatedValue = cut(calculate());
-				yield put({
-					type: ConcalcActionTypes.CONCALC_STORE_NUMBER_S,
-					payload: calculatedValue,
-				});
-			} else {
-				const numberToStore = Number(screen);
-				yield put({
-					type: ConcalcActionTypes.CONCALC_STORE_NUMBER_S,
-					payload: numberToStore,
-				});
-			}
+
+		if (storedOperator) {
+			const calculatedValue = cut(calculate());
+			yield storeNumber(calculatedValue);
+			yield storeOperator(null);
+		} else {
+			yield storeNumber(screen);
 		}
 
-		yield put({
-			type: ConcalcActionTypes.CONCALC_STORE_OPERATOR_S,
-			payload,
-		});
-		yield put({
-			type: ConcalcActionTypes.CONCALC_SCREEN_SET_S,
-			payload: payload.symbol,
-		});
+		yield storeOperator(payload);
+		yield setScreen(payload.symbol);
 	} catch (e) {
 		console.log(e);
 		yield reset();
@@ -194,18 +175,12 @@ export function * handleDigitsAction(action:PayloadAction<string>) {
 
 	const trimmedScreen = filterScreen(newScreen);
 
-	yield put({
-		type: ConcalcActionTypes.CONCALC_SCREEN_SET_S,
-		payload: trimmedScreen,
-	});
+	yield setScreen(trimmedScreen);
 }
 
 export function * concalcWatcher() {
 	yield takeEvery(ConcalcActionTypes.CONCALC_COMPONENTS_AREA_SET, setComponentsArea);
 	yield takeEvery(ConcalcActionTypes.CONCALC_CONSTRUCTOR_AREA_SET, setConstructorArea);
-	yield takeEvery(ConcalcActionTypes.CONCALC_SCREEN_SET, setScreenValue);
-	yield takeEvery(ConcalcActionTypes.CONCALC_STORE_NUMBER, storeNumber);
-	yield takeEvery(ConcalcActionTypes.CONCALC_STORE_OPERATOR, storeOperator);
 	yield takeEvery(ConcalcActionTypes.CONCALC_RESOLVE, resolve);
 	yield takeEvery(ConcalcActionTypes.CONCALC_OPERATOR_ACTION, handleOperatorAction);
 	yield takeEvery(ConcalcActionTypes.CONCALC_DIGITS_ACTION, handleDigitsAction);
